@@ -3,7 +3,7 @@
 # Handle Errors Function
     handle_error() {
         clear
-        echo -e "$1\n$2\n"
+        echo -e "$1\n$2\n" >> debug-file.txt
         exit 1
     }
 #
@@ -27,9 +27,11 @@
 
         echo -e "[+] Dowloading server files...\n"
 
-        if ! wget https://piston-data.mojang.com/v1/objects/145ff0858209bcfc164859ba735d4199aafa1eea/server.jar; then
+        if ! sudo wget https://piston-data.mojang.com/v1/objects/145ff0858209bcfc164859ba735d4199aafa1eea/server.jar; then
             handle_error "[DOWLOAD ERROR]" "Minecraft Server dowload failed"
         fi
+
+
 
         clear
         echo "Especify amount of RAM (GB) the server will use: (only number ej: 1 = 1GB of RAM)"
@@ -84,7 +86,7 @@ Do you want to proceed? (y/n)
 
 EOF
 
-# Ask to run
+# Ask to run & make server directory
     read option
 
     if [ "$option" != "y" ]; then
@@ -93,21 +95,38 @@ EOF
         exit 0
     fi
 
-    clear
-#
+    # CREATE DEBUG FILE
 
-# 0. UPDATE PACKAGES
-    echo "[+] Updating packages..."
-    if ! sudo apt update; then
-        handle_error "[UPDATE PACKAGES ERROR]" "Please check your connection and try again"
+    echo "[+] CREATING SERVER DIRECTORY..."
+
+    # Crear directorio del servidor
+    if ! sudo mkdir /home/minecraft-server; then
+        handle_error "[ERROR ON CREATING SERVER DIRECTORY]" "No data"
+    fi
+
+    # Viaja hasta el directorio del srevidor
+    if ! cd /home/minecraft-server; then
+        handle_error "[ERROR ACCESSING SERVER DIRECOTORY]" "No data"
     fi
 
     clear
 #
 
-    # If user dont have java -> install
-    # else -> continue
+# 0. UPDATE PACKAGES
+    echo "[+] Updating packages..."
+    if ! sudo apt update && sudo apt updgrade; then
+        handle_error "[UPDATE PACKAGES ERROR]" "Please check your connection and try again"
+    fi
+    clear
 
+    echo "[+] Installing Google Drive for backups Conection..."
+    if ! sudo apt install rclone; then
+        handle_error "[GOOGLE DRIVE CONNECTION DOWLOAD FAILED]" "Please check your connection and try again"
+    fi
+#
+
+# If user dont have java -> install
+# else -> continue
     if ! java --version; then
         # 1. INSTALLING JAVA
 
@@ -162,6 +181,7 @@ EOF
             fi
         #
     fi
+# end
 
 # 2. INSTALLING MINECRAFT SERVER
 
@@ -195,10 +215,7 @@ EOF
             esac
         done
     #
-
-    
 #
-
 
 # Mostrar mensaje de finalización
 echo "FINISHED"
