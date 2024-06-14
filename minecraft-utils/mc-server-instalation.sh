@@ -3,7 +3,9 @@
 # Handle Errors Function
     handle_error() {
         clear
-        echo -e "$1\n$2\n" >> debug-file.txt
+        cd utils/minecraft-utils
+        FECHA_HORA=$(date '+%Y-%m-%d %H:%M:%S')
+        echo -e "<${FECHA_HORA}> Problem:$1 | Info: $2" >> debug-file.txt
         exit 1
     }
 #
@@ -19,6 +21,7 @@
 #
 
 # Installation functions
+# VANILLA
     vanilla() {
 
         clear
@@ -31,9 +34,11 @@
             handle_error "[DOWLOAD ERROR]" "Minecraft Server dowload failed"
         fi
 
-
-
         clear
+
+        # Editar el archivo eula.txt para aceptar el EULA
+        sudo echo "eula=true" > "eula.txt"
+
         echo "Especify amount of RAM (GB) the server will use: (only number ej: 1 = 1GB of RAM)"
         read ram_amount
 
@@ -42,9 +47,8 @@
         fi
 
         clear
-        echo -e "   - IMPORTANT-    \n\nOpen eula.txt and accept it\n"
-        echo -e "\n Use command:    sudo nano eula.txt\n(If you dont have nano, install one editor)\n"
     }
+#
 
     paper() {
 
@@ -67,6 +71,7 @@
 
 
 # Show banner
+clear
 cat << "EOF"
 
 ███╗   ███╗ ██████╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗     ██████╗ ███╗   ███╗     ██╗
@@ -80,7 +85,7 @@ cat << "EOF"
 EOF
 
 cat << "EOF"
-This Script only works on Ubuntu based distributions (contains .deb files & apt)
+This script only works on Ubuntu based distributions (contains .deb files & apt)
 
 Do you want to proceed? (y/n)
 
@@ -90,8 +95,8 @@ EOF
     read option
 
     if [ "$option" != "y" ]; then
-        echo "EXITING SCRIPT..."
         clear
+        echo "EXITED SUCCESSFULY!"
         exit 0
     fi
 
@@ -99,14 +104,24 @@ EOF
 
     echo "[+] CREATING SERVER DIRECTORY..."
 
-    # Crear directorio del servidor
-    if ! sudo mkdir /home/minecraft-server; then
-        handle_error "[ERROR ON CREATING SERVER DIRECTORY]" "No data"
+    # Goto server directory
+    if ! cd ../../; then
+        handle_error "[ERROR ACCESSING SERVER DIRECTORY]" "No data"
     fi
 
-    # Viaja hasta el directorio del srevidor
-    if ! cd /home/minecraft-server; then
-        handle_error "[ERROR ACCESSING SERVER DIRECOTORY]" "No data"
+    # Make server-directory
+    if ! sudo mkdir minecraft-servers; then
+        if ! sudo rm -rf minecraft-servers; then
+            handle_error "[ERROR REMOVING DIRECTORY]" "No data"
+        fi
+
+        if ! sudo mkdir minecraft-servers; then
+            handle_error "[ERROR CREATING DIRECTORY]" "No data"
+        fi
+    fi
+
+    if ! cd minecraft-servers; then
+        handle_error "[ERROR ACCESSING SERVER DIRECTORY]" "minecraft-servers dont exists"
     fi
 
     clear
@@ -122,6 +137,11 @@ EOF
     echo "[+] Installing Google Drive for backups Conection..."
     if ! sudo apt install rclone; then
         handle_error "[GOOGLE DRIVE CONNECTION DOWLOAD FAILED]" "Please check your connection and try again"
+    fi
+
+    echo "[+] Installing Screen for console..."
+    if ! sudo apt install screen; then
+        handle_error "[SCREEN DOWLOAD FAILED]" "Please check your connection and try again"
     fi
 #
 
@@ -184,7 +204,6 @@ EOF
 # end
 
 # 2. INSTALLING MINECRAFT SERVER
-
     # Show menu & install user choice
         while true; do
             show_menu
@@ -205,11 +224,13 @@ EOF
                 q)
                     clear
                     echo "[FINISING...]"
+                    echo "  - No server was installed"
+                    echo "ENDED OK"
                     exit 0
                     ;;
                 *)
                     clear
-                    echo -e "Invalid option\nPlease choose one of the above or exit (q)"
+                    echo -e "   INVALID OPTION\n > Please choose one of the above or exit (q) <"
                     sleep 3
                     ;;
             esac
@@ -218,5 +239,5 @@ EOF
 #
 
 # Mostrar mensaje de finalización
-echo "FINISHED"
+echo "ENDED OK"
 exit 0
