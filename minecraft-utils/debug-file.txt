@@ -9,3 +9,7 @@
 <2024-06-22 13:24:51> Problem:[ERROR WRITTING INTO EULA FILE] | Info: No data
 <2024-06-22 13:47:03> Problem:[GOOGLE DRIVE CONNECTION DOWLOAD FAILED] | Info: Please check your connection and try again
 <2024-06-22 14:11:38> Problem:[PERMISIONS ERROR] | Info: 733 chmod cannot be stabliched on /minecraft-servers directory
+<2024-06-23 21:05:43> Problem:[DOWLOAD ERROR] | Info: Minecraft Server dowload failed
+<2024-06-23 21:08:33> Problem:[DOWLOAD FORGE ERROR] | Info: Minecraft Server dowload failed
+<2024-06-23 21:14:26> Problem:[SERVER CREATION ERROR] | Info: Server cannot be created
+<2024-06-23 21:16:11> Problem:[SERVER CREATION ERROR] | Info: Server cannot be created

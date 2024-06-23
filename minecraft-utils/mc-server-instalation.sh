@@ -59,7 +59,7 @@ path="$(pwd)"
 
         echo -e "[+] Dowloading server files...\n"
 
-        if ! sudo wget https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar; then
+        if ! wget https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar; then
             handle_error "[DOWLOAD ERROR]" "Minecraft Server dowload failed"
         fi
 
@@ -71,6 +71,8 @@ path="$(pwd)"
         if ! java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar server.jar nogui; then
             handle_error "[SERVER CREATION ERROR]" "Server cannot be created"
         fi
+
+        echo "[IMPORTANT]: Goto server directory and accept the EULA.txt (use nano editor)"
     }
 
 # PAPER
@@ -88,10 +90,67 @@ path="$(pwd)"
 
     forge() {
 
+        # REINSTALL DIRECTORY
+        if ! cd forge-server; then
+
+            if ! mkdir forge-server; then
+                handle_error "[ERROR CREATING FORGE SERVER DIRECTORY]" "No data"
+            fi
+
+            if ! cd forge-server; then
+                handle_error "[ERROR ACCESSING DIRECTORY]" "No data"
+            fi
+        fi
+
+        # DELETE
+        if ! sudo rm -rf *; then
+            handle_error "[ERROR ON DELETE]" "All info of the forge server cannot be rebooted"
+        fi
+
+        clear
+
+        # Debug Path
+            if [ ${debug_path} == "true" ]; then
+                echo -e "\n[DEBUG-PATH]: Current path: $(pwd)"
+                echo "Press [ENTER] to continue..."
+                read continue
+            fi
+        #
+
         clear
 
         echo -e "[YOU SELECTED FORGE]\n"
 
+        echo -e "\n\n[WARNING]: Servers will be created in $(pwd) directory & current FORGE version if 1.19.4"
+        echo "This program cannot install another version of forge, if you want to change this goto script code and edit in FORGE the variable \"URL-FORGE\" to change version"
+        echo  "> type: (n) to exit or any key to continue."
+        read option
+
+        if [ "$option" == "n" ]; then
+            echo "THE SERVER WAS NO INSTALED (exit 0)"
+            exit 0
+        fi
+
+        echo -e "[+] Dowloading server files...\n"
+        echo -e
+
+        FORGE="https://maven.minecraftforge.net/net/minecraftforge/forge/1.19.4-45.3.0/forge-1.19.4-45.3.0-installer.jar"
+
+        if ! wget $FORGE; then
+            handle_error "[DOWLOAD FORGE ERROR]" "Minecraft Server dowload failed"
+        fi
+
+        clear
+
+        echo "Especify amount of RAM (GB) the server will use: (only number ej:  1   => 1GB of RAM)"
+        echo "[RECOMENDATION]: If you are using a mod pack use +4GB of RAM"
+        read ram_amount
+
+        if ! java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar forge-1.19.4-45.3.0-installer.jar nogui; then
+            handle_error "[SERVER CREATION ERROR]" "Server cannot be created"
+        fi
+
+        echo "[IMPORTANT]: Goto server directory and accept the EULA.txt (use nano editor)"
 
     }
 #
@@ -143,7 +202,7 @@ EOF
     echo "[+] CREATING SERVER DIRECTORY..."
 
     # Goto server directory
-    if ! cd ../../; then
+    if ! cd ../; then
         handle_error "[ERROR ACCESSING SERVER DIRECTORY]" "No data"
     fi
 
@@ -227,7 +286,7 @@ EOF
             fi
 
             # Instalar el paquete descargado
-            if ! dpkg -i jdk-22_linux-x64_bin.deb; then
+            if ! sudo dpkg -i jdk-22_linux-x64_bin.deb; then
                 handle_error "[COMPRESSION ERROR]" "No data"
             fi
 
