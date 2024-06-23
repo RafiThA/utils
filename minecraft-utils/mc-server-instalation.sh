@@ -1,11 +1,15 @@
 #!/bin/bash
 
+debug_path=false
+path="$(pwd)"
+
 # Handle Errors Function
     handle_error() {
         clear
-        cd utils/minecraft-utils
+        cd $path
         FECHA_HORA=$(date '+%Y-%m-%d %H:%M:%S')
         echo -e "<${FECHA_HORA}> Problem:$1 | Info: $2" >> debug-file.txt
+        echo -e "[PROGRAM FAILED]\nCheck debug-file.txt to see what happened current error\nError: $1"
         exit 1
     }
 #
@@ -24,31 +28,52 @@
 # VANILLA
     vanilla() {
 
+        # REINSTALL DIRECTORY
+        if ! cd vanilla-server; then
+
+            if ! mkdir vanilla-server; then
+                handle_error "[ERROR CREATING VANILLA SERVER DIRECTORY]" "No data"
+            fi
+
+            if ! cd vanilla-server; then
+                handle_error "[ERROR ACCESSING DIRECTORY]" "No data"
+            fi
+        fi
+
+        # DELETE
+        if ! sudo rm -rf *; then
+            handle_error "[ERROR ON DELETE]" "All info of the vanilla server cannot be rebooted"
+        fi
+
         clear
+
+        # Debug Path
+            if [ ${debug_path} == "true" ]; then
+                echo -e "\n[DEBUG-PATH]: Current path: $(pwd)"
+                echo "Press [ENTER] to continue..."
+                read continue
+            fi
+        #
 
         echo -e "[YOU SELECTED VANILLA]\n\n"
 
         echo -e "[+] Dowloading server files...\n"
 
-        if ! sudo wget https://piston-data.mojang.com/v1/objects/145ff0858209bcfc164859ba735d4199aafa1eea/server.jar; then
+        if ! sudo wget https://piston-data.mojang.com/v1/objects/450698d1863ab5180c25d7c804ef0fe6369dd1ba/server.jar; then
             handle_error "[DOWLOAD ERROR]" "Minecraft Server dowload failed"
         fi
 
         clear
 
-        # Editar el archivo eula.txt para aceptar el EULA
-        sudo echo "eula=true" > "eula.txt"
-
-        echo "Especify amount of RAM (GB) the server will use: (only number ej: 1 = 1GB of RAM)"
+        echo "Especify amount of RAM (GB) the server will use: (only number ej:  1   => 1GB of RAM)"
         read ram_amount
 
         if ! java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar server.jar nogui; then
-            handle_error "[SERVER ERROR]" "Server cannot start"
+            handle_error "[SERVER CREATION ERROR]" "Server cannot be created"
         fi
-
-        clear
     }
-#
+
+# PAPER
 
     paper() {
 
@@ -58,6 +83,8 @@
 
 
     }
+
+# FORGE
 
     forge() {
 
@@ -71,7 +98,18 @@
 
 
 # Show banner
-clear
+    clear
+
+    # Debug Paths
+
+        if [ "$1" == "-dp" ]; then
+            echo "[DEBUG PATH ENABLED]"
+            echo "Absolute: $path"
+            debug_path=true
+        fi
+    #
+
+
 cat << "EOF"
 
 ███╗   ███╗ ██████╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗     ██████╗ ███╗   ███╗     ██╗
@@ -94,13 +132,13 @@ EOF
 # Ask to run & make server directory
     read option
 
+    clear
+
     if [ "$option" != "y" ]; then
         clear
         echo "EXITED SUCCESSFULY!"
         exit 0
     fi
-
-    # CREATE DEBUG FILE
 
     echo "[+] CREATING SERVER DIRECTORY..."
 
@@ -109,19 +147,38 @@ EOF
         handle_error "[ERROR ACCESSING SERVER DIRECTORY]" "No data"
     fi
 
-    # Make server-directory
-    if ! sudo mkdir minecraft-servers; then
-        if ! sudo rm -rf minecraft-servers; then
-            handle_error "[ERROR REMOVING DIRECTORY]" "No data"
+    # Goto server directory 2
+    if ! cd minecraft-servers; then
+        
+        if ! mkdir minecraft-servers; then
+            handle_error "[ERROR CREATING DIRECTORY]" "Error creating minecraft-servers direcotory"
         fi
 
-        if ! sudo mkdir minecraft-servers; then
-            handle_error "[ERROR CREATING DIRECTORY]" "No data"
+        # Enlable permision
+        if ! sudo chmod 733 minecraft-servers/; then
+            handle_error "[PERMISIONS ERROR]" "733 chmod cannot be stabliched on /minecraft-servers directory"
+        fi
+
+        if ! cd minecraft-servers; then
+            handle_error "[ERROR ACCESING DIRECTORY]" "No data"
         fi
     fi
 
-    if ! cd minecraft-servers; then
-        handle_error "[ERROR ACCESSING SERVER DIRECTORY]" "minecraft-servers dont exists"
+    # Debug Path
+        if [ ${debug_path} == "true" ]; then
+            echo -e "\n[DEBUG-PATH]: Current path: $(pwd)"
+            echo "Press [ENTER] to continue..."
+            read continue
+        fi
+    #
+
+    echo "[INFO]: Servers will be created in $(pwd) directory"
+    echo  "> type: (n) to exit or any key to continue."
+    read option
+
+    if [ "$option" == "n" ]; then
+        echo "TO BE EDITED exit 0"
+        exit 0
     fi
 
     clear
@@ -129,7 +186,7 @@ EOF
 
 # 0. UPDATE PACKAGES
     echo "[+] Updating packages..."
-    if ! sudo apt update && sudo apt updgrade; then
+    if ! sudo apt update && apt updgrade; then
         handle_error "[UPDATE PACKAGES ERROR]" "Please check your connection and try again"
     fi
     clear
@@ -153,7 +210,7 @@ EOF
             echo "[+] Installing Java ..."
 
             # Crear directorio temporal
-            if ! sudo mkdir tmp; then
+            if ! mkdir tmp; then
                 handle_error "[ERROR ON CREATING TMP DIRECTORY]" "No data"
             fi
 
@@ -170,7 +227,7 @@ EOF
             fi
 
             # Instalar el paquete descargado
-            if ! sudo dpkg -i jdk-22_linux-x64_bin.deb; then
+            if ! dpkg -i jdk-22_linux-x64_bin.deb; then
                 handle_error "[COMPRESSION ERROR]" "No data"
             fi
 
@@ -180,12 +237,13 @@ EOF
             fi
 
             # Eliminar el directorio temporal
-            if ! sudo rm -rf tmp; then
+            if ! rm -rf tmp; then
                 handle_error "[ERROR ON DELETING DIRECTORY]" "No data"
             fi
 
             clear
 
+            # If java --version dont exist throw error
             if ! java --version; then
                 handle_error "[ERROR CHECKING JAVA VERSION]" "Please check all the dependencies needed"
             fi
