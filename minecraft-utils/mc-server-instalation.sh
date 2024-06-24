@@ -121,7 +121,7 @@ path="$(pwd)"
 
         echo -e "[YOU SELECTED FORGE]\n"
 
-        echo -e "\n\n[WARNING]: Servers will be created in $(pwd) directory & current FORGE version if 1.19.4"
+        echo -e "\n\n[WARNING]: Servers will be created in $(pwd) directory & current FORGE version if 1.19.2"
         echo "This program cannot install another version of forge, if you want to change this goto script code and edit in FORGE the variable \"URL-FORGE\" to change version"
         echo  "> type: (n) to exit or any key to continue."
         read option
@@ -146,7 +146,7 @@ path="$(pwd)"
         echo "[RECOMENDATION]: If you are using a mod pack use +4GB of RAM"
         read ram_amount
 
-        if ! sudo java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar forge-1.19.4-45.3.0-installer.jar nogui; then
+        if ! sudo java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar forge-1.19.2-45.3.0-installer.jar nogui; then
             handle_error "[SERVER CREATION ERROR]" "Server cannot be created"
         fi
 
