@@ -68,7 +68,7 @@ path="$(pwd)"
         echo "Especify amount of RAM (GB) the server will use: (only number ej:  1   => 1GB of RAM)"
         read ram_amount
 
-        if ! java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar server.jar nogui; then
+        if ! sudo java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar server.jar nogui; then
             handle_error "[SERVER CREATION ERROR]" "Server cannot be created"
         fi
 
@@ -134,7 +134,7 @@ path="$(pwd)"
         echo -e "[+] Dowloading server files...\n"
         echo -e
 
-        FORGE="https://maven.minecraftforge.net/net/minecraftforge/forge/1.19.4-45.3.0/forge-1.19.4-45.3.0-installer.jar"
+        FORGE="https://maven.minecraftforge.net/net/minecraftforge/forge/1.19.2-43.4.0/forge-1.19.2-43.4.0-installer.jar"
 
         if ! wget $FORGE; then
             handle_error "[DOWLOAD FORGE ERROR]" "Minecraft Server dowload failed"
@@ -146,7 +146,7 @@ path="$(pwd)"
         echo "[RECOMENDATION]: If you are using a mod pack use +4GB of RAM"
         read ram_amount
 
-        if ! java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar forge-1.19.4-45.3.0-installer.jar nogui; then
+        if ! sudo java -Xmx"$ram_amount"G -Xms"$ram_amount"G -jar forge-1.19.4-45.3.0-installer.jar nogui; then
             handle_error "[SERVER CREATION ERROR]" "Server cannot be created"
         fi
 
